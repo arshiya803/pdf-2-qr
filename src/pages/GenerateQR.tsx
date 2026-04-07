@@ -56,8 +56,8 @@ export default function GenerateQR() {
 
       if (insertError) throw insertError;
 
-      const shareUrl = `${window.location.origin}/view/${insertData.public_share_id}`;
-      setQrUrl(shareUrl);
+      // QR points directly to the public PDF so anyone can open it without login
+      setQrUrl(publicUrl);
       setShareId(insertData.public_share_id);
       toast.success("PDF uploaded & QR code generated!");
     } catch (err: any) {
