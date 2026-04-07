@@ -1,8 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, QrCode, Check, FileText } from "lucide-react";
+import { Upload, QrCode, Check, FileText, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { QRCodeSVG } from "qrcode.react";
@@ -134,13 +134,34 @@ export default function GenerateQR() {
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
-              <div className="p-4 bg-card rounded-xl border">
+              <div id="qr-canvas" className="p-4 bg-card rounded-xl border">
                 <QRCodeSVG value={qrUrl} size={200} level="H" />
               </div>
               <p className="text-sm text-muted-foreground text-center break-all">{qrUrl}</p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap justify-center">
                 <Button variant="outline" onClick={() => { navigator.clipboard.writeText(qrUrl); toast.success("Link copied!"); }}>
                   Copy Link
+                </Button>
+                <Button variant="outline" onClick={() => {
+                  const svg = document.querySelector("#qr-canvas svg") as SVGElement;
+                  if (!svg) return;
+                  const svgData = new XMLSerializer().serializeToString(svg);
+                  const canvas = document.createElement("canvas");
+                  canvas.width = 250; canvas.height = 250;
+                  const ctx = canvas.getContext("2d")!;
+                  const img = new Image();
+                  img.onload = () => {
+                    ctx.fillStyle = "#fff";
+                    ctx.fillRect(0, 0, 250, 250);
+                    ctx.drawImage(img, 25, 25, 200, 200);
+                    const a = document.createElement("a");
+                    a.download = "qr-code.png";
+                    a.href = canvas.toDataURL("image/png");
+                    a.click();
+                  };
+                  img.src = "data:image/svg+xml;base64," + btoa(svgData);
+                }}>
+                  <Download className="mr-1 h-4 w-4" /> Download QR
                 </Button>
                 <Button onClick={() => navigate("/share", { state: { shareUrl: qrUrl, shareId } })} className="gradient-primary text-primary-foreground">
                   Share
