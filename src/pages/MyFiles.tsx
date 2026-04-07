@@ -77,7 +77,7 @@ export default function MyFiles() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {files.map((file) => {
-              const shareUrl = `${window.location.origin}/view/${file.public_share_id}`;
+              const publicUrl = supabase.storage.from("pdfs").getPublicUrl(file.file_path).data.publicUrl;
               return (
                 <Card key={file.id} className="shadow-card hover:shadow-elevated transition-all group">
                   <CardContent className="p-5">
@@ -96,10 +96,10 @@ export default function MyFiles() {
                       <Button size="sm" variant="outline" onClick={() => handleDownload(file)}>
                         <Download className="h-3.5 w-3.5 mr-1" /> Download
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => setSelectedQR(shareUrl)}>
+                      <Button size="sm" variant="outline" onClick={() => setSelectedQR(publicUrl)}>
                         <QrCode className="h-3.5 w-3.5 mr-1" /> QR
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => navigate("/share", { state: { file, shareUrl } })}>
+                      <Button size="sm" variant="outline" onClick={() => navigate("/share", { state: { file, shareUrl: publicUrl } })}>
                         <Share2 className="h-3.5 w-3.5 mr-1" /> Share
                       </Button>
                       <Button size="sm" variant="destructive" onClick={() => handleDelete(file)}>

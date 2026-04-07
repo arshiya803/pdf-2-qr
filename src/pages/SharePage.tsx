@@ -17,7 +17,7 @@ export default function SharePage() {
   const [selectedFile, setSelectedFile] = useState<any>(location.state?.file || null);
 
   const shareUrl = selectedFile
-    ? (location.state?.shareUrl || `${window.location.origin}/view/${selectedFile.public_share_id}`)
+    ? (location.state?.shareUrl || supabase.storage.from("pdfs").getPublicUrl(selectedFile.file_path).data.publicUrl)
     : "";
 
   useEffect(() => {
