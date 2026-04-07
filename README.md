@@ -1,4 +1,4 @@
-This is my live link : https://pdf-2-qr.lovable.app
+This is my live link : https://pdf-2-qr.lovable.app/
 
 
 PDF to QR Code Management System
