@@ -18,13 +18,22 @@ export default function GenerateQR() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
+  const allowedTypes = [
+    "application/pdf",
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
-    if (selected && selected.type === "application/pdf") {
+    if (selected && allowedTypes.includes(selected.type)) {
       setFile(selected);
       setQrUrl(null);
     } else {
-      toast.error("Please select a PDF file");
+      toast.error("Please select a PDF, JPG, PNG, or Word document");
     }
   };
 
@@ -84,7 +93,7 @@ export default function GenerateQR() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".pdf"
+                accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx"
                 onChange={handleFileSelect}
                 className="hidden"
               />
@@ -99,8 +108,8 @@ export default function GenerateQR() {
               ) : (
                 <div className="flex flex-col items-center gap-2">
                   <Upload className="h-12 w-12 text-muted-foreground" />
-                  <p className="font-medium">Click to select PDF</p>
-                  <p className="text-sm text-muted-foreground">PDF files only, max 20MB</p>
+                   <p className="font-medium">Click to select a file</p>
+                   <p className="text-sm text-muted-foreground">PDF, JPG, PNG, or Word documents, max 20MB</p>
                 </div>
               )}
             </div>
