@@ -81,7 +81,7 @@ export default function GenerateQR() {
       <div className="max-w-2xl mx-auto space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Generate QR Code</h1>
-          <p className="text-muted-foreground">Upload a PDF and get a shareable QR code instantly.</p>
+           <p className="text-muted-foreground">Upload a PDF, image, or Word document and get a shareable QR code instantly.</p>
         </div>
 
         <Card className="shadow-card">
