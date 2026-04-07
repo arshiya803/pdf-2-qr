@@ -19,6 +19,12 @@ export default function SharePage() {
   const shareUrl = selectedFile
     ? (location.state?.shareUrl || supabase.storage.from("pdfs").getPublicUrl(selectedFile.file_path).data.publicUrl)
     : "";
+  const shareText = selectedFile ? `Check out this PDF: ${selectedFile.file_name}` : "Check out this PDF";
+  const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`;
+  const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+  const emailUrl = `mailto:?subject=${encodeURIComponent(
+    selectedFile ? `Shared PDF: ${selectedFile.file_name}` : "Shared PDF"
+  )}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`;
 
   useEffect(() => {
     if (!user) return;
@@ -30,31 +36,14 @@ export default function SharePage() {
       .then(({ data }) => setFiles(data || []));
   }, [user]);
 
-  const shareVia = (method: string) => {
-    const text = `Check out this PDF: ${shareUrl}`;
-    switch (method) {
-      case "whatsapp":
-        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-        break;
-      case "telegram":
-        window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent("Check out this PDF")}`, "_blank");
-        break;
-      case "email":
-        window.open(`mailto:?subject=Shared PDF&body=${encodeURIComponent(text)}`, "_blank");
-        break;
-      case "copy":
-        navigator.clipboard.writeText(shareUrl);
-        toast.success("Link copied to clipboard!");
-        break;
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied to clipboard!");
+    } catch {
+      toast.error("Copy failed");
     }
   };
-
-  const shareOptions = [
-    { name: "WhatsApp", icon: MessageCircle, method: "whatsapp", color: "bg-green-500 hover:bg-green-600" },
-    { name: "Telegram", icon: Send, method: "telegram", color: "bg-blue-500 hover:bg-blue-600" },
-    { name: "Email", icon: Mail, method: "email", color: "bg-orange-500 hover:bg-orange-600" },
-    { name: "Copy Link", icon: Copy, method: "copy", color: "bg-secondary hover:bg-secondary/90" },
-  ];
 
   return (
     <DashboardLayout>
@@ -105,15 +94,24 @@ export default function SharePage() {
             </Card>
 
             <div className="grid grid-cols-2 gap-3">
-              {shareOptions.map((opt) => (
-                <Button
-                  key={opt.method}
-                  className={`${opt.color} text-primary-foreground h-14 text-base`}
-                  onClick={() => shareVia(opt.method)}
-                >
-                  <opt.icon className="mr-2 h-5 w-5" /> {opt.name}
-                </Button>
-              ))}
+              <Button variant="outline" className="h-14 text-base" asChild>
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="mr-2 h-5 w-5" /> WhatsApp
+                </a>
+              </Button>
+              <Button variant="outline" className="h-14 text-base" asChild>
+                <a href={telegramUrl} target="_blank" rel="noopener noreferrer">
+                  <Send className="mr-2 h-5 w-5" /> Telegram
+                </a>
+              </Button>
+              <Button variant="outline" className="h-14 text-base" asChild>
+                <a href={emailUrl}>
+                  <Mail className="mr-2 h-5 w-5" /> Email
+                </a>
+              </Button>
+              <Button variant="outline" className="h-14 text-base" onClick={handleCopyLink}>
+                <Copy className="mr-2 h-5 w-5" /> Copy Link
+              </Button>
             </div>
 
             <Button variant="outline" className="w-full" onClick={() => setSelectedFile(null)}>
