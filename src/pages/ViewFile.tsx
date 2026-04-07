@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Download, FileText, QrCode } from "lucide-react";
+import { Download, FileText, QrCode, ExternalLink } from "lucide-react";
 
 export default function ViewFile() {
   const { shareId } = useParams();
@@ -12,18 +12,21 @@ export default function ViewFile() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchFile = async () => {
       const { data, error } = await supabase
         .from("pdf_files")
         .select("*")
         .eq("public_share_id", shareId)
         .maybeSingle();
 
-      if (!data || error) setNotFound(true);
-      else setFile(data);
+      if (!data || error) {
+        setNotFound(true);
+      } else {
+        setFile(data);
+      }
       setLoading(false);
     };
-    fetch();
+    fetchFile();
   }, [shareId]);
 
   if (loading) {
@@ -60,9 +63,29 @@ export default function ViewFile() {
             Shared on {new Date(file.created_at).toLocaleDateString()}
             {file.file_size && ` • ${(file.file_size / 1024 / 1024).toFixed(2)} MB`}
           </p>
-          <Button className="gradient-primary text-primary-foreground" onClick={() => window.open(publicUrl, "_blank")}>
-            <Download className="mr-2 h-4 w-4" /> Download PDF
-          </Button>
+          <div className="flex gap-3 justify-center flex-wrap">
+            <Button className="gradient-primary text-primary-foreground" asChild>
+              <a href={publicUrl} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="mr-2 h-4 w-4" /> Open PDF
+              </a>
+            </Button>
+            <Button variant="outline" onClick={async () => {
+              try {
+                const res = await fetch(publicUrl);
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = file.file_name;
+                a.click();
+                URL.revokeObjectURL(url);
+              } catch {
+                window.open(publicUrl, "_blank");
+              }
+            }}>
+              <Download className="mr-2 h-4 w-4" /> Download
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
